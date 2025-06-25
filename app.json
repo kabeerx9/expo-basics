@@ -31,14 +31,24 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kabeerx9.course"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.kabeerx9.course"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "872cf024-2b8c-4ae2-94f0-9975de4c9fe9"
       }
     }
   }
