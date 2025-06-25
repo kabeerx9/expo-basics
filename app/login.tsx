@@ -2,35 +2,22 @@ import 'react-native-url-polyfill/auto';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { Session } from '@supabase/supabase-js';
 import { supabase } from '~/lib/supabase';
+import { useAuth } from '~/components/AuthProvider';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
+  const { session } = useAuth();
   const router = useRouter();
 
+  // Redirect if already authenticated
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) {
-        router.replace('/(tabs)');
-      }
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session) {
-        router.replace('/(tabs)');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+    if (session) {
+      router.replace('/(tabs)');
+    }
+  }, [session]);
 
   async function signIn() {
     if (!email || !password) {
@@ -94,7 +81,7 @@ export default function Login() {
         </TouchableOpacity>
 
         <View className="mt-6 flex-row justify-center">
-          <Text className="text-gray-600">Don't have an account? </Text>
+          <Text className="text-gray-600">Don&apos;t have an account? </Text>
           <TouchableOpacity onPress={() => router.push('./signup')}>
             <Text className="font-medium text-blue-600">Sign Up</Text>
           </TouchableOpacity>
