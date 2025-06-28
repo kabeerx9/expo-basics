@@ -10,6 +10,7 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -42,16 +43,74 @@ export default function Signup() {
     const { error } = await supabase.auth.signUp({
       email: email,
       password: password,
+      options: {
+        emailRedirectTo: 'course://auth/confirm',
+      },
     });
 
     if (error) {
       Alert.alert('Error', error.message);
+    } else {
+      setEmailSent(true);
     }
     setLoading(false);
   }
 
   if (session) {
     return null; // Will redirect to tabs
+  }
+
+  // Show email verification UI after successful signup
+  if (emailSent) {
+    return (
+      <View className="flex-1 bg-white">
+        <View className="flex-1 justify-center px-8">
+          {/* Success Icon */}
+          <View className="mb-6 items-center">
+            <View className="h-20 w-20 items-center justify-center rounded-full bg-green-100">
+              <Text className="text-3xl">📧</Text>
+            </View>
+          </View>
+
+          <Text className="mb-4 text-center text-3xl font-bold text-gray-800">
+            Check Your Email
+          </Text>
+
+          <Text className="mb-8 text-center leading-6 text-gray-600">
+            We sent a confirmation link to{'\n'}
+            <Text className="font-medium text-gray-800">{email}</Text>
+            {'\n\n'}
+            Click the link in your email to activate your account and get started.
+          </Text>
+
+          {/* Resend Email Button */}
+          <TouchableOpacity
+            className="mb-4 rounded-lg border border-blue-600 py-4"
+            onPress={() => {
+              setEmailSent(false);
+              signUp(); // Resend email
+            }}
+            disabled={loading}>
+            <Text className="text-center font-semibold text-blue-600">Resend Email</Text>
+          </TouchableOpacity>
+
+          {/* Back to Login */}
+          <TouchableOpacity
+            className="rounded-lg bg-gray-100 py-4"
+            onPress={() => router.push('./login')}>
+            <Text className="text-center font-semibold text-gray-700">Back to Sign In</Text>
+          </TouchableOpacity>
+
+          {/* Try Different Email */}
+          <View className="mt-6 flex-row justify-center">
+            <Text className="text-gray-600">Wrong email? </Text>
+            <TouchableOpacity onPress={() => setEmailSent(false)}>
+              <Text className="font-medium text-blue-600">Try Again</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
   }
 
   return (
