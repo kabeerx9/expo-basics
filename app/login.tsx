@@ -2,22 +2,21 @@ import 'react-native-url-polyfill/auto';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { supabase } from '~/lib/supabase';
 import { useAuth } from '~/components/AuthProvider';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { session } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (session) {
+    if (user) {
       router.replace('/(tabs)');
     }
-  }, [session]);
+  }, [user]);
 
   async function signIn() {
     if (!email || !password) {
@@ -26,18 +25,14 @@ export default function Login() {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
-    });
 
-    if (error) {
-      Alert.alert('Error', error.message);
-    }
+    // TODO: Implement Clerk sign in
+    Alert.alert('Todo', 'Implement Clerk sign in here');
+
     setLoading(false);
   }
 
-  if (session) {
+  if (user) {
     return null; // Will redirect to tabs
   }
 

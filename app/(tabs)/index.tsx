@@ -1,44 +1,30 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Session } from '@supabase/supabase-js';
-import { supabase } from '~/lib/supabase';
+import { useAuth } from '~/components/AuthProvider';
 
 export default function TabOneScreen() {
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
+  const { user, signOut } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (!session) {
-        router.replace('../login');
-      }
-    });
+    if (!user) {
+      router.replace('../login');
+    }
+  }, [user]);
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (!session) {
-        router.replace('../login');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  async function signOut() {
+  async function handleSignOut() {
     setLoading(true);
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      Alert.alert('Error', error.message);
+    try {
+      await signOut();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to sign out');
     }
     setLoading(false);
   }
 
-  if (!session) {
+  if (!user) {
     return (
       <View className="flex-1 items-center justify-center bg-gray-50">
         <Text className="text-gray-600">Loading...</Text>
@@ -62,27 +48,23 @@ export default function TabOneScreen() {
           <View className="space-y-3">
             <View className="flex-row justify-between border-b border-gray-100 py-2">
               <Text className="font-medium text-gray-600">Email</Text>
-              <Text className="text-gray-800">{session.user.email}</Text>
+              <Text className="text-gray-800">{user.email}</Text>
             </View>
 
             <View className="flex-row justify-between border-b border-gray-100 py-2">
               <Text className="font-medium text-gray-600">User ID</Text>
-              <Text className="text-xs text-gray-800">{session.user.id}</Text>
+              <Text className="text-xs text-gray-800">{user.id}</Text>
             </View>
 
             <View className="flex-row justify-between border-b border-gray-100 py-2">
               <Text className="font-medium text-gray-600">Created</Text>
-              <Text className="text-gray-800">
-                {new Date(session.user.created_at).toLocaleDateString()}
-              </Text>
+              <Text className="text-gray-800">{new Date(user.createdAt).toLocaleDateString()}</Text>
             </View>
 
             <View className="flex-row justify-between py-2">
               <Text className="font-medium text-gray-600">Last Sign In</Text>
               <Text className="text-gray-800">
-                {session.user.last_sign_in_at
-                  ? new Date(session.user.last_sign_in_at).toLocaleDateString()
-                  : 'N/A'}
+                {user.lastSignInAt ? new Date(user.lastSignInAt).toLocaleDateString() : 'N/A'}
               </Text>
             </View>
           </View>
@@ -93,7 +75,7 @@ export default function TabOneScreen() {
           <View className="flex-1 rounded-xl bg-blue-50 p-4">
             <Text className="text-sm font-medium text-blue-600">Session Time</Text>
             <Text className="text-lg font-bold text-blue-800">
-              {Math.floor((Date.now() - new Date(session.user.created_at).getTime()) / 60000)}m
+              {Math.floor((Date.now() - new Date(user.createdAt).getTime()) / 60000)}m
             </Text>
           </View>
 
@@ -123,7 +105,7 @@ export default function TabOneScreen() {
 
           <TouchableOpacity
             className={`rounded-xl bg-red-600 p-4 ${loading ? 'opacity-50' : ''}`}
-            onPress={signOut}
+            onPress={handleSignOut}
             disabled={loading}>
             <Text className="text-center font-semibold text-white">
               {loading ? 'Signing Out...' : 'Sign Out'}
