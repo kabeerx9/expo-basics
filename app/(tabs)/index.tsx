@@ -1,18 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useAuth } from '~/components/AuthProvider';
 
 export default function TabOneScreen() {
   const [loading, setLoading] = useState(false);
   const { user, signOut } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!user) {
-      router.replace('../login');
-    }
-  }, [user]);
 
   async function handleSignOut() {
     setLoading(true);
