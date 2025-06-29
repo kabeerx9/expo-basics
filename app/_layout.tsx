@@ -12,19 +12,13 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
+  const url = Linking.useURL();
+
   useEffect(() => {
-    // Handle deep links when app is already running
-    const subscription = Linking.addEventListener('url', handleDeepLink);
-
-    // Handle deep link that opened the app (when app was closed)
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        handleDeepLink({ url });
-      }
-    });
-
-    return () => subscription?.remove();
-  }, []);
+    if (url) {
+      handleDeepLink({ url });
+    }
+  }, [url]);
 
   const handleDeepLink = ({ url }: { url: string }) => {
     console.log('🔗 Deep link received:', url);
